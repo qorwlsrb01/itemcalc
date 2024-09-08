@@ -1,0 +1,28 @@
+.collapsible-section {
+    cursor: pointer;
+    padding: 10px;
+    border: 1px solid #ccc;
+    margin-bottom: 10px;
+    background-color: #f9f9f9;
+    transition: background-color 0.3s;
+  }
+  
+  .collapsible-section:hover {
+    background-color: #e0e0e0;
+  }
+  
+  .collapsible-section.collapsed {
+    max-height: 0;
+    overflow: hidden;
+  }
+  
+  .collapsible-section h3 {
+    margin: 0;
+    font-size: 1.2em;
+  }
+  
+  .collapsible-section img {
+    max-width: 100%;
+    height: auto;
+  }
+  
