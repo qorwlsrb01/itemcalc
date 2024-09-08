@@ -19,6 +19,10 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['PROCESSED_FOLDER'] = PROCESSED_FOLDER
 app.config['ITEM_IMAGES_FOLDER'] = ITEM_IMAGES_FOLDER
 
+@app.route("/")
+def index():
+    return "플라스크 서버 정상 실행 중"
+
 @app.route('/processed_uploads/<filename>')
 def serve_processed_image(filename):
     return send_from_directory(PROCESSED_FOLDER, filename)
