@@ -101,13 +101,13 @@ function ImageUpload({ onCategoryDetected, characterInfo, onImageUploadStats }) 
     formData.append('file', file);
 
     try {
-      const response = await axios.post('http://127.0.0.1:5000/ocr', formData, {
+      const response = await axios.post('http://itemcalc.site/api/ocr', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
       const { processed_image, item_images, refined_results } = response.data;
-      setProcessedImage(`http://127.0.0.1:5000/processed_uploads/${processed_image}`);
-      const itemImageURLs = item_images.map(imgName => `http://127.0.0.1:5000/item_images/${imgName}`);
+      setProcessedImage(`http://itemcalc.site/api/processed_uploads/${processed_image}`);
+      const itemImageURLs = item_images.map(imgName => `http://itemcalc.site/api/item_images/${imgName}`);
       setItemImages(itemImageURLs);
       const extractedStats = extractCharacterStats(refined_results);
       setStats(extractedStats);
