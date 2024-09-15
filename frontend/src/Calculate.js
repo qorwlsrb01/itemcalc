@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import setMap from './setMap.json'; // 세트 이름 매핑 JSON 파일
 import setBonuses from './setBonuses.json'; // 세트 보너스 데이터 JSON 파일
 
-const Calculate = ({ userOcid, calculatedStats, imageUploadStats }) => {
+const Calculate = ({ userOcid, calculatedStats, imageUploadStats, characterInfo }) => {
     const API_KEY = "live_57d709dd5f22133108bddcc733433d52f5d95a60c8e1751d895143547388bbb5efe8d04e6d233bd35cf2fabdeb93fb0d";
     
     // stats 기본값 정의
@@ -173,11 +173,24 @@ const Calculate = ({ userOcid, calculatedStats, imageUploadStats }) => {
     return (
         <div>
             <h3>세트 옵션</h3>
+            <div>
+            <strong>현재 세트:</strong> {calculatedStats["세트"]} 
+            <br />
+            <strong>세트 개수:</strong> {setCounts[calculatedStats["세트"]] || 0} -{'>'} {setCounts[calculatedStats["세트"]]-1 || 0}
+        </div>
+        <div>
+            <strong>변경할 세트:</strong> {imageUploadStats["세트"]}
+            <br />
+            <strong>세트 개수:</strong> {setCounts[imageUploadStats["세트"]] || 0} -{'>'} {setCounts[imageUploadStats["세트"]]+1 || 1}
+        </div>
             <ul>
-                {Object.entries(stats).map(([stat, value]) => (
+                {Object.entries(stats)
+                .slice(1) // 첫 번째 항목 제외
+                .map(([stat, value]) => (
                     <li key={stat}>{stat}: {value}</li>
                 ))}
             </ul>
+
             <h2>최종 스탯 증감</h2>
             <table border="1">
                 <thead>
@@ -201,35 +214,46 @@ const Calculate = ({ userOcid, calculatedStats, imageUploadStats }) => {
             </table>
             
             <table border="1">
-                <thead>
-                    <tr>
-                        <th>주스탯</th>
-                        <th>주스탯%</th>
-                        <th>부스탯</th>
-                        <th>부스탯%</th>
-                        <th>부스탯2</th>
-                        <th>부스탯2%</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>{finalStats["주스탯"]}</td>
-                        <td>{finalStats["주스탯%"]}</td>
-                        <td>{finalStats["부스탯"]}</td>
-                        <td>{finalStats["부스탯%"]}</td>
-                        <td>{finalStats["부스탯2"]}</td>
-                        <td>{finalStats["부스탯2%"]}</td>
-                    </tr>
-                </tbody>
-            </table>
+    <thead>
+        <tr>
+            <th>주스탯</th>
+            <th>주스탯%</th>
+            <th>부스탯</th>
+            <th>부스탯%</th>
+            {characterInfo.부스탯2 !== null && (
+                <>
+                    <th>부스탯2</th>
+                    <th>부스탯2%</th>
+                </>
+            )}
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>{finalStats["주스탯"]}</td>
+            <td>{finalStats["주스탯%"]}</td>
+            <td>{finalStats["부스탯"]}</td>
+            <td>{finalStats["부스탯%"]}</td>
+            {characterInfo.부스탯2 !== null && (
+                <>
+                    <td>{finalStats["부스탯2"]}</td>
+                    <td>{finalStats["부스탯2%"]}</td>
+                </>
+            )}
+        </tr>
+    </tbody>
+</table>
+
 
             <table border="1">
                 <thead>
                     <tr>
                         <th>9렙당주스탯</th>
                         <th>9렙당부스탯</th>
-                        <th>9렙당부스탯2</th>
-                        <th>올스탯</th>
+                        {characterInfo.부스탯2 !== null && (
+                            <th>9렙당부스탯2</th>
+                        )}
+                        <th>올스탯%</th>
                         <th>쿨감</th>
                     </tr>
                 </thead>
@@ -237,7 +261,9 @@ const Calculate = ({ userOcid, calculatedStats, imageUploadStats }) => {
                     <tr>
                         <td>{finalStats["9렙당주스탯"]}</td>
                         <td>{finalStats["9렙당부스탯"]}</td>
-                        <td>{finalStats["9렙당부스탯2"]}</td>
+                        {characterInfo.부스탯2 !== null && (
+                            <td>{finalStats["9렙당부스탯2"]}</td>
+                        )}
                         <td>{finalStats["올스탯"]}</td>
                         <td>{finalStats["쿨감"]}</td>
                     </tr>

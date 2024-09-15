@@ -275,6 +275,7 @@ function ImageUpload({ onCategoryDetected, characterInfo, onImageUploadStats }) 
 
       {(preview && !processedImage) && (
         <div>
+          <h2 style={{color:'red'}}>↑↑↑ 이미지 인식 버튼을 눌러주세요</h2>
           <h3>원본 이미지 미리보기:</h3>
           <img src={preview} alt="Preview" style={{ maxWidth: '100%', maxHeight: '400px' }} />
         </div>

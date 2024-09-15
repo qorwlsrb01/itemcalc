@@ -6,7 +6,7 @@ import requests
 import json
 import time
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 import dhash
 from PIL import Image
 
@@ -162,15 +162,24 @@ def refine_text(text, patterns, corrections):
 
     return refined_results
 
-def load_blacklisted_image(file_name='blacklist.png'):
+def load_blacklisted_images(folder='blacklist'):
     """
-    블랙리스트 이미지를 로드합니다.
+    블랙리스트 폴더 내의 모든 이미지를 로드합니다.
     """
-    # 현재 작업 디렉터리와의 상대 경로로 파일을 로드합니다.
+    blacklisted_images = []
+    
+    # 현재 작업 디렉터리와의 상대 경로로 폴더를 로드합니다.
     current_dir = os.path.dirname(__file__)
-    blacklisted_image_path = os.path.join(current_dir, file_name)
-    blacklisted_image = cv2.imread(blacklisted_image_path)
-    return blacklisted_image
+    blacklist_folder_path = os.path.join(current_dir, folder)
+    
+    # blacklist 폴더 내의 모든 파일을 반복하며 이미지를 로드합니다.
+    for filename in os.listdir(blacklist_folder_path):
+        file_path = os.path.join(blacklist_folder_path, filename)
+        image = cv2.imread(file_path)
+        if image is not None:
+            blacklisted_images.append(image)
+    
+    return blacklisted_images
 
 def calculate_image_similarity(img1, img2):
     """
@@ -198,11 +207,12 @@ def get_timestamp():
     현재 날짜와 시간을 'YYYYMMDD_HHMMSS' 형식으로 반환합니다.
     """
     now = datetime.now()
-    return now.strftime('%Y%m%d_%H%M%S')
+    utc_plus_9 = now + timedelta(hours=9)  # UTC 시간에 9시간을 더합니다.
+    return utc_plus_9.strftime('%Y%m%d_%H%M%S')
 
-def process_image(image_path, processed_folder, item_images_folder, blacklist_file='blacklist.png', threshold_value1=50, threshold_value2=80):
-    # 블랙리스트 이미지 로드
-    blacklisted_image = load_blacklisted_image(blacklist_file)
+def process_image(image_path, processed_folder, item_images_folder, blacklist_folder='blacklist', threshold_value1=50, threshold_value2=80):
+    # 블랙리스트 폴더 내의 모든 이미지 로드
+    blacklisted_images = load_blacklisted_images(blacklist_folder)
 
     # 원본 이미지 읽기
     image = cv2.imread(image_path)
@@ -227,21 +237,22 @@ def process_image(image_path, processed_folder, item_images_folder, blacklist_fi
         if 300 > w > 200 and h > 400:
             item_image = image[y:y + h, x:x + w]
             
-            # 블랙리스트 이미지와 유사도 비교
-            similarity = calculate_image_similarity(item_image, blacklisted_image)
-            if similarity < 0.75:  # 유사도가 75% 미만일 때만 처리
-                cv2.rectangle(image, (x, y), (x + w, y + h), (0, 0, 255), 2)
-                
-                timestamp = get_timestamp()
-                item_image_filename = f"item_{timestamp}.png"
-                item_image_path = os.path.join(item_images_folder, item_image_filename)
-                cv2.imwrite(item_image_path, item_image)
-                item_images_paths.append(item_image_filename)
-                item_images.append(item_image)
-                found_item_region = True
-                
-                # 가장 왼쪽의 영역을 처리한 후 루프 종료
-                break
+            # 블랙리스트 폴더 내의 모든 이미지와 유사도 비교
+            for blacklisted_image in blacklisted_images:
+                similarity = calculate_image_similarity(item_image, blacklisted_image)
+                if similarity < 0.75:  # 유사도가 75% 미만일 때만 처리
+                    cv2.rectangle(image, (x, y), (x + w, y + h), (0, 0, 255), 2)
+                    
+                    timestamp = get_timestamp()
+                    item_image_filename = f"item_{timestamp}.png"
+                    item_image_path = os.path.join(item_images_folder, item_image_filename)
+                    cv2.imwrite(item_image_path, item_image)
+                    item_images_paths.append(item_image_filename)
+                    item_images.append(item_image)
+                    found_item_region = True
+                    
+                    # 가장 왼쪽의 영역을 처리한 후 루프 종료
+                    break
 
     # 아이템 영역을 찾지 못했을 경우 전체 이미지가 조건에 맞는지 확인
     if not found_item_region:
